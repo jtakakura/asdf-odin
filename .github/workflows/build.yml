@@ -7,15 +7,22 @@ on:
   pull_request:
 
 jobs:
-  plugin_test:
-    name: asdf plugin test
-    strategy:
-      matrix:
-        os:
-          - ubuntu-latest
-          - macos-latest
-    runs-on: ${{ matrix.os }}
+  plugin_test_ubuntu:
+    runs-on: ubuntu-latest
     steps:
+      - name: asdf_plugin_test
+        uses: asdf-vm/actions/plugin-test@v1
+        with:
+          command: odin version
+  plugin_test_macos:
+    runs-on: macos-latest
+    steps:
+      - name: Download LLVM and setup PATH
+        run: |
+          brew install llvm@11
+          echo "/usr/local/opt/llvm@11/bin" >> $GITHUB_PATH
+          TMP_PATH=$(xcrun --show-sdk-path)/user/include
+          echo "CPATH=$TMP_PATH" >> $GITHUB_ENV
       - name: asdf_plugin_test
         uses: asdf-vm/actions/plugin-test@v1
         with:
