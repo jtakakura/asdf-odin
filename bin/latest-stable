@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+current_script_path=${BASH_SOURCE[0]}
+plugin_dir=$(dirname "$(dirname "$current_script_path")")
+
+if [ -f "${plugin_dir}/bin/list-all" ]; then
+  ("${plugin_dir}"/bin/list-all "") | tr ' ' '\n' | sed 's/^[[:space:]]\+//' | tail -1 | xargs echo
+fi

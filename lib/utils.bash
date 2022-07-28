@@ -2,7 +2,6 @@
 
 set -euo pipefail
 
-# TODO: Ensure this is the correct GitHub homepage where releases can be downloaded for odin.
 GH_REPO="https://github.com/odin-lang/Odin"
 TOOL_NAME="odin"
 TOOL_TEST="odin version"
@@ -25,24 +24,24 @@ sort_versions() {
 }
 
 list_github_tags() {
+  excludes=(0.9.1 llvm-4.0-windows llvm-windows pre-dev-2021-04 0.0.3c 0.0.3d 0.0.4 0.0.5 0.0.5a 0.0.5b 0.0.5c 0.0.5d 0.0.5e 0.0.6 0.0.6a 0.0.6b 0.1.0 0.1.1 0.1.3 0.10.0 0.11.0 0.11.1 0.12.0 0.13.0 0.2.0 0.2.1 0.3.0 0.4.0 0.5.0 0.6.0 0.6.1 0.6.1a 0.6.2 0.7.0 0.7.1 0.8.0 0.8.1 0.9.0)
   git ls-remote --tags --refs "$GH_REPO" |
     grep -o 'refs/tags/.*' | cut -d/ -f3- |
-    sed 's/^v//' # NOTE: You might want to adapt this sed to remove non-version strings from tags
+    sed 's/^v//' | sed "$(printf -- "/^%s$/d;" ${excludes[*]})"
 }
 
 list_all_versions() {
-  # TODO: Adapt this. By default we simply list the tag names from GitHub releases.
   # Change this function if odin has other means of determining installable versions.
   list_github_tags
 }
 
 download_release() {
-  local version filename url
-  version="$1"
-  filename="$2"
+  local platform version filename url
+  platform="$1"
+  version="$2"
+  filename="$3"
 
-  # TODO: Adapt the release URL convention for odin
-  url="$GH_REPO/archive/v${version}.tar.gz"
+  url="$GH_REPO/releases/download/${version}/odin-${platform}-amd64-${version}.zip"
 
   echo "* Downloading $TOOL_NAME release $version..."
   curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
@@ -60,8 +59,8 @@ install_version() {
   (
     mkdir -p "$install_path"
     cp -r "$ASDF_DOWNLOAD_PATH"/* "$install_path"
+    chmod +x "$install_path/$TOOL_NAME"
 
-    # TODO: Assert odin executable exists.
     local tool_cmd
     tool_cmd="$(echo "$TOOL_TEST" | cut -d' ' -f1)"
     test -x "$install_path/$tool_cmd" || fail "Expected $install_path/$tool_cmd to be executable."
