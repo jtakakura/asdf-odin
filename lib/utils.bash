@@ -48,17 +48,26 @@ download_release() {
 }
 
 install_version() {
-  local install_type="$1"
-  local version="$2"
-  local install_path="${3%/bin}/bin"
+  local install_type platform version install_path platform download_path
+  install_type="$1"
+  platform="$2"
+  version="$3"
+  install_path="${4%/bin}/bin"
 
   if [ "$install_type" != "version" ]; then
     fail "asdf-$TOOL_NAME supports release installs only"
   fi
 
+  if [ -d "$ASDF_DOWNLOAD_PATH/${platform}"_artifacts ]; then
+    download_path="$ASDF_DOWNLOAD_PATH/${platform}_artifacts"
+  else
+    download_path="$ASDF_DOWNLOAD_PATH"
+  fi
+
   (
     mkdir -p "$install_path"
-    cp -r "$ASDF_DOWNLOAD_PATH"/* "$install_path"
+
+    cp -r "$download_path"/* "$install_path"
     chmod +x "$install_path/$TOOL_NAME"
 
     local tool_cmd

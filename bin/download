@@ -23,8 +23,6 @@ download_release "$platform" "$ASDF_INSTALL_VERSION" "$release_file"
 
 #  Extract contents of zip file into the download directory
 unzip -qq "$release_file" -d "$ASDF_DOWNLOAD_PATH" || fail "Could not extract $release_file"
-mv "$ASDF_DOWNLOAD_PATH/${platform}"_artifacts/* "$ASDF_DOWNLOAD_PATH"
-rm -rf "$ASDF_DOWNLOAD_PATH/${platform}"_artifacts
 
 # Remove the zip file since we don't need to keep it
 rm "$release_file"
