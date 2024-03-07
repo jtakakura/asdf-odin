@@ -11,6 +11,11 @@ linux*) platform="ubuntu" ;;
 *) fail "Unsupported platform" ;;
 esac
 
+arch="amd64"
+case $(uname -m) in
+  arm64) arch="arm64"
+esac
+
 # shellcheck source=../lib/utils.bash
 source "${plugin_dir}/lib/utils.bash"
 
@@ -19,10 +24,17 @@ mkdir -p "$ASDF_DOWNLOAD_PATH"
 release_file="$ASDF_DOWNLOAD_PATH/$TOOL_NAME-$ASDF_INSTALL_VERSION.zip"
 
 # Download zip file to the download directory
-download_release "$platform" "$ASDF_INSTALL_VERSION" "$release_file"
+download_release "$platform" "$arch" "$ASDF_INSTALL_VERSION" "$release_file"
 
 #  Extract contents of zip file into the download directory
 unzip -qq "$release_file" -d "$ASDF_DOWNLOAD_PATH" || fail "Could not extract $release_file"
+
+# Versions after dev-2023-02 are zipped up in the CI to keep executable permissions, and then zipped up again by GitHub.
+if [ -f "$ASDF_DOWNLOAD_PATH/dist.zip" ]; then
+  unzip -qq "$ASDF_DOWNLOAD_PATH/dist.zip" -d "$ASDF_DOWNLOAD_PATH" || fail "Could not extract $ASDF_DOWNLOAD_PATH/dist.zip"
+  rm "$ASDF_DOWNLOAD_PATH/dist.zip"
+  mv $ASDF_DOWNLOAD_PATH/dist/* "$ASDF_DOWNLOAD_PATH"
+fi
 
 # Remove the zip file since we don't need to keep it
 rm "$release_file"
