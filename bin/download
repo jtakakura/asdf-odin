@@ -13,7 +13,7 @@ esac
 
 arch="amd64"
 case $(uname -m) in
-  arm64) arch="arm64"
+arm64) arch="arm64" ;;
 esac
 
 # shellcheck source=../lib/utils.bash
@@ -33,7 +33,7 @@ unzip -qq "$release_file" -d "$ASDF_DOWNLOAD_PATH" || fail "Could not extract $r
 if [ -f "$ASDF_DOWNLOAD_PATH/dist.zip" ]; then
   unzip -qq "$ASDF_DOWNLOAD_PATH/dist.zip" -d "$ASDF_DOWNLOAD_PATH" || fail "Could not extract $ASDF_DOWNLOAD_PATH/dist.zip"
   rm "$ASDF_DOWNLOAD_PATH/dist.zip"
-  mv $ASDF_DOWNLOAD_PATH/dist/* "$ASDF_DOWNLOAD_PATH"
+  mv "$ASDF_DOWNLOAD_PATH"/dist/* "$ASDF_DOWNLOAD_PATH"
 fi
 
 # Remove the zip file since we don't need to keep it
