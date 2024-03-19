@@ -36,12 +36,13 @@ list_all_versions() {
 }
 
 download_release() {
-  local platform version filename url
+  local platform arch version filename url
   platform="$1"
-  version="$2"
-  filename="$3"
+  arch="$2"
+  version="$3"
+  filename="$4"
 
-  url="$GH_REPO/releases/download/${version}/odin-${platform}-amd64-${version}.zip"
+  url="$GH_REPO/releases/download/${version}/odin-${platform}-${arch}-${version}.zip"
 
   echo "* Downloading $TOOL_NAME release $version..."
   curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
@@ -68,6 +69,10 @@ install_version() {
     mkdir -p "$install_path"
 
     cp -r "$download_path"/* "$install_path"
+
+    # Versions after dev-2024-02 are already executable when downloaded,
+    # to support versions before that release we still `chmod` it.
+
     chmod +x "$install_path/$TOOL_NAME"
 
     local tool_cmd
