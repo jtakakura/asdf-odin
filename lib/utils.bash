@@ -61,6 +61,8 @@ install_version() {
 
   if [ -d "$ASDF_DOWNLOAD_PATH/${platform}"_artifacts ]; then
     download_path="$ASDF_DOWNLOAD_PATH/${platform}_artifacts"
+  elif [ -d "$ASDF_DOWNLOAD_PATH/dist" ]; then
+    download_path="$ASDF_DOWNLOAD_PATH/dist"
   else
     download_path="$ASDF_DOWNLOAD_PATH"
   fi
