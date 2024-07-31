@@ -34,6 +34,7 @@ if [ -f "$ASDF_DOWNLOAD_PATH/dist.zip" ]; then
   unzip -qq "$ASDF_DOWNLOAD_PATH/dist.zip" -d "$ASDF_DOWNLOAD_PATH" || fail "Could not extract $ASDF_DOWNLOAD_PATH/dist.zip"
   rm "$ASDF_DOWNLOAD_PATH/dist.zip"
   mv "$ASDF_DOWNLOAD_PATH"/dist/* "$ASDF_DOWNLOAD_PATH"
+  rm -rf "$ASDF_DOWNLOAD_PATH"/dist/
 fi
 
 # Remove the zip file since we don't need to keep it
