@@ -35,6 +35,35 @@ list_all_versions() {
   list_github_tags
 }
 
+build_url() {
+  local platform arch version
+  platform="$1"
+  arch="$2"
+  version="$3"
+
+  echo "$GH_REPO/releases/download/${version}/odin-${platform}-${arch}-${version}.zip"
+}
+
+get_platform() {
+  local arch version
+  arch="$1"
+  version="$2"
+
+  case "$OSTYPE" in
+  linux*)
+    if curl -o /dev/null -s --head --fail $(build_url "linux" "$arch" "$version"); then
+      echo "linux"
+    elif curl -o /dev/null -s --head --fail $(build_url "ubuntu" "$arch" "$version"); then
+      echo "ubuntu"
+    else
+      fail "Unsupported platform: $OSTYPE"
+    fi
+    ;;
+  darwin*) echo "macos" ;;
+  *) fail "Unsupported platform: $OSTYPE" ;;
+  esac
+}
+
 download_release() {
   local platform arch version filename url
   platform="$1"
@@ -42,18 +71,19 @@ download_release() {
   version="$3"
   filename="$4"
 
-  url="$GH_REPO/releases/download/${version}/odin-${platform}-${arch}-${version}.zip"
+  url=$(build_url "$platform" "$arch" "$version")
 
   echo "* Downloading $TOOL_NAME release $version..."
   curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
 }
 
 install_version() {
-  local install_type platform version install_path platform download_path
+  local install_type platform arch version install_path download_path
   install_type="$1"
   platform="$2"
-  version="$3"
-  install_path="${4%/bin}/bin"
+  arch="$3"
+  version="$4"
+  install_path="${5%/bin}/bin"
 
   if [ "$install_type" != "version" ]; then
     fail "asdf-$TOOL_NAME supports release installs only"
@@ -63,6 +93,8 @@ install_version() {
     download_path="$ASDF_DOWNLOAD_PATH/${platform}_artifacts"
   elif [ -d "$ASDF_DOWNLOAD_PATH/dist" ]; then
     download_path="$ASDF_DOWNLOAD_PATH/dist"
+  elif [ -d "$ASDF_DOWNLOAD_PATH/odin-${platform}-${arch}-${version}" ]; then
+    download_path="$ASDF_DOWNLOAD_PATH/odin-${platform}-${arch}-${version}"
   else
     download_path="$ASDF_DOWNLOAD_PATH"
   fi

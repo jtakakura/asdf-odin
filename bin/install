@@ -5,13 +5,14 @@ set -euo pipefail
 current_script_path=${BASH_SOURCE[0]}
 plugin_dir=$(dirname "$(dirname "$current_script_path")")
 
-case "$OSTYPE" in
-darwin*) platform="macos" ;;
-linux*) platform="ubuntu" ;;
-*) fail "Unsupported platform" ;;
+arch="amd64"
+case $(uname -m) in
+arm64) arch="arm64" ;;
 esac
 
 # shellcheck source=../lib/utils.bash
 source "${plugin_dir}/lib/utils.bash"
 
-install_version "$ASDF_INSTALL_TYPE" "$platform" "$ASDF_INSTALL_VERSION" "$ASDF_INSTALL_PATH"
+platform=$(get_platform "$arch" "$ASDF_INSTALL_VERSION")
+
+install_version "$ASDF_INSTALL_TYPE" "$platform" "$arch" "$ASDF_INSTALL_VERSION" "$ASDF_INSTALL_PATH"
