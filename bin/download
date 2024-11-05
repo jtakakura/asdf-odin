@@ -30,6 +30,19 @@ if [ -f "$ASDF_DOWNLOAD_PATH/dist.zip" ]; then
   unzip -qq "$ASDF_DOWNLOAD_PATH/dist.zip" -d "$ASDF_DOWNLOAD_PATH" || fail "Could not extract $ASDF_DOWNLOAD_PATH/dist.zip"
   rm "$ASDF_DOWNLOAD_PATH/dist.zip"
 fi
+for tarball in "$ASDF_DOWNLOAD_PATH/dist.tar."{gz,bz2,xz}; do
+  if [[ -f $tarball ]]; then
+    tar xf "$tarball" --directory="$ASDF_DOWNLOAD_PATH" || fail "Could not extract $tarball"
+    rm "$tarball"
+  fi
+done
+
+for nested_folder in "$ASDF_DOWNLOAD_PATH/$TOOL_NAME-$platform-"*; do
+  if [[ -d $nested_folder ]]; then
+    mv "$nested_folder"/* "$ASDF_DOWNLOAD_PATH" || fail "Could not move contents of $nested_folder"
+    rmdir "$nested_folder" || fail "Could not remove $nested_folder"
+  fi
+done
 
 # Remove the zip file since we don't need to keep it
 rm "$release_file"
