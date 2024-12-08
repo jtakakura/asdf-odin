@@ -36,42 +36,58 @@ list_all_versions() {
 }
 
 build_url() {
-  local platform arch version
+  local platform arch version zformat
   platform="$1"
   arch="$2"
   version="$3"
+  zformat="$4"
 
-  echo "$GH_REPO/releases/download/${version}/odin-${platform}-${arch}-${version}.zip"
+  echo "$GH_REPO/releases/download/${version}/odin-${platform}-${arch}-${version}.${zformat}"
 }
 
 get_platform() {
-  local arch version
+  local arch version found
   arch="$1"
   version="$2"
 
   case "$OSTYPE" in
   linux*)
-    if curl -o /dev/null -s --head --fail $(build_url "linux" "$arch" "$version"); then
-      echo "linux"
-    elif curl -o /dev/null -s --head --fail $(build_url "ubuntu" "$arch" "$version"); then
-      echo "ubuntu"
+    for zformat in {"zip","tar.gz","tar.bz2","tar.xz"}; do
+      if curl -o /dev/null -s --head --fail $(build_url "linux" "$arch" "$version" "$zformat"); then
+        found="linux ${zformat}"
+        break
+      elif curl -o /dev/null -s --head --fail $(build_url "ubuntu" "$arch" "$version" "$zformat"); then
+        found="ubuntu ${zformat}"
+        break
+      fi
+    done
+    if [ -n "$found" ]; then
+      echo "$found"
     else
       fail "Unsupported platform: $OSTYPE"
     fi
     ;;
-  darwin*) echo "macos" ;;
+  darwin*)
+    for zformat in {"zip","tar.gz","tar.bz2","tar.xz"}; do
+      if curl -o /dev/null -s --head --fail $(build_url "macos" "$arch" "$version" "$zformat"); then
+        echo "macos ${zformat}"
+        break
+      fi
+    done
+    ;;
   *) fail "Unsupported platform: $OSTYPE" ;;
   esac
 }
 
 download_release() {
-  local platform arch version filename url
+  local platform arch version zformat filename url
   platform="$1"
   arch="$2"
   version="$3"
-  filename="$4"
+  zformat="$4"
+  filename="$5"
 
-  url=$(build_url "$platform" "$arch" "$version")
+  url=$(build_url "$platform" "$arch" "$version" "$zformat")
 
   echo "* Downloading $TOOL_NAME release $version..."
   curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
