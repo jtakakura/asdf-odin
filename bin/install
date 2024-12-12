@@ -13,6 +13,8 @@ esac
 # shellcheck source=../lib/utils.bash
 source "${plugin_dir}/lib/utils.bash"
 
-platform=$(get_platform "$arch" "$ASDF_INSTALL_VERSION")
+# shellcheck disable=SC2207
+return_vals=($(get_platform "$arch" "$ASDF_INSTALL_VERSION"))
+platform=${return_vals[0]}
 
 install_version "$ASDF_INSTALL_TYPE" "$platform" "$arch" "$ASDF_INSTALL_VERSION" "$ASDF_INSTALL_PATH"

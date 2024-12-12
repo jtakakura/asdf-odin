@@ -13,17 +13,24 @@ esac
 # shellcheck source=../lib/utils.bash
 source "${plugin_dir}/lib/utils.bash"
 
-platform=$(get_platform "$arch" "$ASDF_INSTALL_VERSION")
+# shellcheck disable=SC2207
+return_vals=($(get_platform "$arch" "$ASDF_INSTALL_VERSION"))
+platform=${return_vals[0]}
+zformat=${return_vals[1]}
 
 mkdir -p "$ASDF_DOWNLOAD_PATH"
 
-release_file="$ASDF_DOWNLOAD_PATH/$TOOL_NAME-$ASDF_INSTALL_VERSION.zip"
+release_file="$ASDF_DOWNLOAD_PATH/$TOOL_NAME-$ASDF_INSTALL_VERSION.$zformat"
 
 # Download zip file to the download directory
-download_release "$platform" "$arch" "$ASDF_INSTALL_VERSION" "$release_file"
+download_release "$platform" "$arch" "$ASDF_INSTALL_VERSION" "$zformat" "$release_file"
 
 #  Extract contents of zip file into the download directory
-unzip -qq "$release_file" -d "$ASDF_DOWNLOAD_PATH" || fail "Could not extract $release_file"
+if [[ "$zformat" == "zip" ]]; then
+  unzip -qq "$release_file" -d "$ASDF_DOWNLOAD_PATH" || fail "Could not extract $release_file"
+else
+  tar xf "$release_file" --directory="$ASDF_DOWNLOAD_PATH" || fail "Could not extract $release_file"
+fi
 
 # Versions after dev-2023-02 are zipped up in the CI to keep executable permissions, and then zipped up again by GitHub.
 if [ -f "$ASDF_DOWNLOAD_PATH/dist.zip" ]; then
@@ -34,6 +41,7 @@ for tarball in "$ASDF_DOWNLOAD_PATH/dist.tar."{gz,bz2,xz}; do
   if [[ -f $tarball ]]; then
     tar xf "$tarball" --directory="$ASDF_DOWNLOAD_PATH" || fail "Could not extract $tarball"
     rm "$tarball"
+    break
   fi
 done
 
