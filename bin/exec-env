@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+if [ -n "$ASDF_INSTALL_PATH" ]; then
+  if [ -z "$ODIN_ROOT" ]; then
+    export ODIN_ROOT="${ASDF_INSTALL_PATH}/bin"
+  fi
+fi
