@@ -45,7 +45,7 @@ for tarball in "$ASDF_DOWNLOAD_PATH/dist.tar."{gz,bz2,xz}; do
   fi
 done
 
-for nested_folder in "$ASDF_DOWNLOAD_PATH/$TOOL_NAME-$platform-"*; do
+for nested_folder in "$ASDF_DOWNLOAD_PATH/$TOOL_NAME-"*; do
   if [[ -d $nested_folder ]]; then
     mv "$nested_folder"/* "$ASDF_DOWNLOAD_PATH" || fail "Could not move contents of $nested_folder"
     rmdir "$nested_folder" || fail "Could not remove $nested_folder"
